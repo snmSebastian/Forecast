@@ -1,6 +1,6 @@
 from packages import pd
 
-#ruta=r'/home/sebastian/Documentos/programas/Forescast Work/Sales_History.csv'
+#ruta=r'/home/sebastian/Documentos/programas/Forescast Work/sales_historical.csv'
 def historical_sales(ruta):
     '''lectura del csv con la inf de venta historica:  este archivo csv es el resultado de unificar todos los xlsx de sharepoint,
       filtrando las columnas de interes para el modelo
@@ -21,7 +21,7 @@ def historical_sales(ruta):
     for col in df_sales_and_product.columns:
         df_sales_and_product.rename(columns={col: col.strip()}, inplace=True)
 
-    df_sales_and_product = df_sales_and_product.sort_values(by=['Date', 'Country Code', 'Brand'], ascending=[True, False, False])
+    df_sales_and_product = df_sales_and_product.sort_values(by=['Date', 'Country', 'Brand'], ascending=[True, False, False])
     df_sales_and_product['Total Sales']=pd.to_numeric(df_sales_and_product['Total Sales'])
     df_sales_and_product=df_sales_and_product[df_sales_and_product['Total Sales']>0]
 

@@ -1,8 +1,9 @@
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 from packages import auto_arima
-def best_parameters_auto_arima(serie_sales,serie,data_train_original, data_train_estacionalizado):
-    
+
+
+def best_parameters_auto_arima(train_data):
     
     ''' Recibe una serie estacionarizada, realiza un proceso autoarima para obtener los mejores parametros para:p,d,q,P,D,Q,s
     con base en estos valores establece los rangos que seran usados en la optimizacion de hiperparametros por medio de 
@@ -18,22 +19,7 @@ def best_parameters_auto_arima(serie_sales,serie,data_train_original, data_train
 
     #Identifica si se esta trabajando con la serie original o la estacionarizada, con base en esto elige el conjunto train
     #con el cual entrenar el modelo autorima
-
-    if len(serie)<len(serie_sales):
-        print(f'serie{len(serie)}')
-        print(f'serie sales{len(serie_sales)}')
-        data_train=data_train_estacionalizado
-        print("autoarima sobre la serie estacionalizada")
-    else:
-        data_train=data_train_original
-        print(f'serie{len(serie)}')
-        print(f'serie sales{len(serie_sales)}')
-        print("autoarima sobre la serie orginal")
-
-     # Validar datos de entrada
-    if len(data_train) == 0:
-        raise ValueError("data_train está vacío. Verifica cómo se está construyendo.")
-
+    
     # Dividir la serie en conjuntos de entrenamiento, validación y prueba
     #train_data, val_data, test_data, train_data_est, val_data_est, test_data_est = Data_Model(serie)
 
@@ -41,7 +27,7 @@ def best_parameters_auto_arima(serie_sales,serie,data_train_original, data_train
     warnings.filterwarnings("ignore")
 
     #Realizar autoarima
-    auto_model = auto_arima(data_train,
+    auto_model = auto_arima(train_data,
                         seasonal=True,
                         m=12,  # Periodo estacional
                         trace=False,  # Muestra el progreso

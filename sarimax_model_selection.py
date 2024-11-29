@@ -2,9 +2,9 @@
 from packages import SARIMAX
 from packages import mean_absolute_error
 from packages import plt
-def sarimax_models(serie_sales,serie,param_grid,
-                    data_train_original,data_validation_original,
-                    data_train_estacionalizado,data_validation_estacionalizado):
+from evaluate_mode import evaluate_sarimax
+
+def sarimax_models(param_grid, train_data, test_data):
     """
     Evalúa todos los modelos SARIMAX generados a partir de un param_grid y selecciona el mejor modelo según el MAE.
     
@@ -21,15 +21,8 @@ def sarimax_models(serie_sales,serie,param_grid,
     #Identifica si se esta trabajando con la serie original o la estacionarizada, con base en esto elige el conjunto train
     #con el cual entrenar el modelo autorima
     print("seleccion modelo sarimax")
-    if len(serie)<len(serie_sales):
-        print("se trabajo con serie estacionalizada")
-        train_data=data_train_estacionalizado
-        test_data=data_validation_estacionalizado
-    else:
-        print("se trabajo con serie orginal")
-        train_data=data_train_original
-        test_data=data_validation_original
 
+    best_predictions=None
     best_params = None
     best_mae = float('inf')  # Inicializar con un valor alto
     
@@ -39,38 +32,26 @@ def sarimax_models(serie_sales,serie,param_grid,
     
     for params in param_grid:
         try:
-            # Desempaquetar los parámetros
-            p, d, q, P, D, Q, s = params
-            
-            # Entrenar el modelo
-            model = SARIMAX(
-                train_data,
-                order=(p, d, q),
-                seasonal_order=(P, D, Q, s),
-                enforce_stationarity=False,
-                enforce_invertibility=False,
-            ).fit(disp=False)
-            
-            # Generar predicciones
-            predictions = model.predict(start=test_start, end=test_end)
-            
-            # Calcular MAE
-            mae = mean_absolute_error(test_data, predictions)
+            mae, predictions = evaluate_sarimax(params, train_data, test_data)
             
             # Actualizar si se encuentra un mejor modelo
             if mae < best_mae:
                 best_mae = mae
-                best_params = params
-            
+                best_params = params  
+                best_predictions = predictions        
         except Exception as e:
             print(f"Error con parámetros {params}: {e}")
     
     mae_percentage = (best_mae / test_data.mean()) * 100 
     print(f"El mae: {best_mae} representa un porcentaje de error del: {mae_percentage:.2f}%")
-    print("Se ejecuto correctamente: sarimax_models") 
-    print("-------------------------------------------------------------------------------\n")
+    
+    plt.figure(figsize=(10, 5))
     plt.plot(test_data, label="Real")
-    plt.plot(predictions, label="Predicciones")
+    plt.plot(best_predictions, label="Predicciones")
+    plt.title(f"Mejor modelo SARIMAX: {best_params}")
     plt.legend()
     plt.show()
     return best_params, best_mae
+
+    print("Se ejecuto correctamente: sarimax_models")   
+    print("-------------------------------------------------------------------------------\n")

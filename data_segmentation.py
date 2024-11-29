@@ -27,3 +27,24 @@ def data_model(serie_sales,serie):
     print("-------------------------------------------------------------------------------\n")
 
     return data_train_original, data_validation_original, data_train_estacionalizado,data_validation_estacionalizado
+
+
+#---------------------------------------------------
+#--- Seleccion entre data original y estacional
+#---------------------------------------------------
+def select_data(serie_sales,serie,\
+                 data_train_original, data_validation_original,\
+                      data_train_estacionalizado, data_validation_estacionalizado):
+    """
+    Selecciona entre datos originales y estacionalizados dependiendo del tamaño de la serie.
+    """
+    if len(serie) < len(serie_sales):
+        print("Trabajando con serie estacionalizada")
+        train_data=data_train_estacionalizado
+        test_data=data_validation_estacionalizado
+        return train_data,test_data
+    else:
+        print("Trabajando con serie original")
+        train_data=data_train_original
+        test_data=data_validation_original
+        return train_data,test_data

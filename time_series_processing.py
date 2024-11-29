@@ -50,7 +50,7 @@ def seasonalize_series(serie):
     serie_copy=serie.copy()
     len_serie=len(serie_copy)
     diff_order = 0  # Contador de diferenciaciones
-    min_observations= len(serie)-24
+    min_observations= len(serie)-48
     max_diff= len(serie)-12
     p_threshold=0.05
     p_value = adfuller(serie)[1]
@@ -63,14 +63,14 @@ def seasonalize_series(serie):
         if p_value <= p_threshold:
             print("la serie es estacionaria")
             if len(serie)<len_serie:         
-                     #print("se devuelve la serie estacionalizada")
-                     # Devuelve la serie diferenciada o en su mejor estado
-                     #print(f'serie inicial:{len(serie_copy)}\n')
-                     #print(f'serie final:{len(serie)}\n')
-                     print("Se ejecuto correctamente: seasonalize_serie")
-                     #print(f"Máximo de diferenciaciones alcanzado: {diff_order}")
-                     print("-------------------------------------------------------------------------------\n")
-            else:
+                    #print("se devuelve la serie estacionalizada")
+                    # Devuelve la serie diferenciada o en su mejor estado
+                    #print(f'serie inicial:{len(serie_copy)}\n')
+                    #print(f'serie final:{len(serie)}\n')
+                    print("Se ejecuto correctamente: seasonalize_serie")
+                    #print(f"Máximo de diferenciaciones alcanzado: {diff_order}")
+                    print("-------------------------------------------------------------------------------\n")
+            else:                    
                     print("Se ejecuto correctamente: seasonalize_serie")
                     print("se devuelve la serie original")
                     print("-------------------------------------------------------------------------------\n")
@@ -79,4 +79,4 @@ def seasonalize_series(serie):
         # Aplicar diferenciación
         serie = serie.diff().dropna()
         diff_order += 1
-        print(f'se diferencia la serie por {diff_order} vez')
+        #print(f'se diferencia la serie por {diff_order} vez')

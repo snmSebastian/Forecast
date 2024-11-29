@@ -140,4 +140,12 @@ sarimax_model_selection.py
     Retorna:
     - best_params: Los mejores parámetros encontrados.
     - best_mae: El MAE más bajo obtenido.
+  
+  file_prueba.py
+    def csv_prueba(ruta_csv,lst_category):
+        Crea un csv filtrando por los elementos de Category Group
+    Arg: ruta_csv: ruta del archivo CSV principal que contiene los datos históricos
+         lst_category: lista con las categorías que se desean filtrar en los datos.
+    Out: df_prueba: csv con la data filtrada
+    
 
