@@ -1,4 +1,6 @@
-
+#======================================================
+#--- Datos de entrenamiento y validacion
+#======================================================
 def data_model(serie_sales,serie):
     ''' 
     Segmenta una serie en conjuntos de entrenamiento, validación y prueba, y genera versiones estacionalizadas.
@@ -21,22 +23,27 @@ def data_model(serie_sales,serie):
     data_train_estacionalizado=serie[:num_reg_train_estacional]
     data_validation_estacionalizado=serie[num_reg_train_estacional:]
 
-    print(f'num reg serie {len(serie)}')
-    print(f'num reg serie_sales {len(serie_sales)}')
+    #print(f'num reg serie {len(serie)}')
+    #print(f'num reg serie_sales {len(serie_sales)}')
     print("Se ejecuto correctamente: data_model")
     print("-------------------------------------------------------------------------------\n")
 
     return data_train_original, data_validation_original, data_train_estacionalizado,data_validation_estacionalizado
 
 
-#---------------------------------------------------
+#=====================================================
 #--- Seleccion entre data original y estacional
-#---------------------------------------------------
+#=====================================================
 def select_data(serie_sales,serie,\
                  data_train_original, data_validation_original,\
                       data_train_estacionalizado, data_validation_estacionalizado):
     """
     Selecciona entre datos originales y estacionalizados dependiendo del tamaño de la serie.
+
+    Arg:serie_sales,serie,\
+                 data_train_original, data_validation_original,\
+                      data_train_estacionalizado, data_validation_estacionalizado
+    Out: train_data, test_data
     """
     if len(serie) < len(serie_sales):
         print("Trabajando con serie estacionalizada")
@@ -48,3 +55,5 @@ def select_data(serie_sales,serie,\
         train_data=data_train_original
         test_data=data_validation_original
         return train_data,test_data
+
+

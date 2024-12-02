@@ -1,7 +1,16 @@
+
+#=================
+#--- Paquetes
+#=================
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 from packages import auto_arima
+from packages import product
 
+
+#====================================================================
+#--- Obitiene los mejores parametros de la serie segun Autoarima
+#====================================================================
 
 def best_parameters_auto_arima(train_data):
     
@@ -39,7 +48,7 @@ def best_parameters_auto_arima(train_data):
     best_params = auto_model.get_params()['order']
     best_seasonal_params = auto_model.get_params()['seasonal_order']
 
-    print(f"Parámetros recomendados por AutoARIMA: {best_params}, {best_seasonal_params}")
+    #print(f"Parámetros recomendados por AutoARIMA: {best_params}, {best_seasonal_params}")
 
     # Define rangos reducidos basados en AutoARIMA
     p_range = range(max(0, best_params[0] - 1), best_params[0] + 2)
@@ -64,3 +73,27 @@ def best_parameters_auto_arima(train_data):
     print("-------------------------------------------------------------------------------\n")
 
     return p_range, d_range, q_range, P_range, D_range, Q_range, s
+
+
+#==========================================================================
+#--- Genera rango alrededor de los mejores parametros Autoarima
+#==========================================================================
+
+def generate_param_grid(p_range, d_range, q_range, P_range, D_range, Q_range, s_range):
+    """
+    Genera todas las combinaciones posibles de hiperparámetros para el modelo SARIMAX.
+    
+    Parámetros:
+    - p_range, d_range, q_range: Rango de los parámetros ARIMA (p, d, q).
+    - P_range, D_range, Q_range: Rango de los parámetros estacionales (P, D, Q).
+    - s_range: Rango del período estacional (s).
+    
+    Retorna:
+    - param_grid: Lista de combinaciones de parámetros.
+    """
+    param_grid = list(product(p_range, d_range, q_range, P_range, D_range, Q_range, s_range))
+    print("Se ejecuto correctamente: generate_param_grid")
+    print("-------------------------------------------------------------------------------\n")
+
+    return param_grid
+

@@ -1,16 +1,16 @@
 from packages import SARIMAX
 from packages import mean_absolute_error
 
-#------------------------------------------------------------
-#---- Evaluacion de modelos
-#------------------------------------------------------------
+#=================================================
+#---- Definicion modelos que se entrenaran
+#=================================================
 
 
 
-#------------------
+#======================
 #--- SARIMAX
-#------------------
-def evaluate_sarimax(params, train_data, test_data):
+#======================
+def training_sarimax(params, train_data, test_data):
     """
     Entrena y evalúa un modelo SARIMAX con parámetros específicos.
 
@@ -33,3 +33,4 @@ def evaluate_sarimax(params, train_data, test_data):
     except Exception as e:
         print(f"Error con parámetros {params}: {e}")
         return float('inf'), None
+    

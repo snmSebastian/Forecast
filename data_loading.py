@@ -1,13 +1,28 @@
-from packages import pd,glob #tratamiento de dato
+#==========================
+#-- Importacion de paquetes
+#==========================
 
-# Rutas de los archivos
+from packages import pd,glob 
+from packages import pd 
+
+#==========================
+#--- Rutas de los archivos
+#==========================
+
 path_data_historica = r'C:\Users\SSN0609\OneDrive - Stanley Black & Decker\Dashboard Marketing\Sales'
 path_data_product = r'C:\Users\SSN0609\OneDrive - Stanley Black & Decker\Master Data\Master Data Products Reclasif.xlsx'
 path_data_country = r'C:\Users\SSN0609\OneDrive - Stanley Black & Decker\Dashboard Marketing\LAG Report\Codes _ PBI.xlsx'
 
+#=====================================
+#-- Se cargan y procesan archivos
+#=====================================
+
+#==========================
+# --- Load date Sharepint
+#==========================
 def sales_sharepoint(path_data_historica, path_data_product, path_data_country):
     """ Función para procesar los datos de ventas desde archivos XLSX alojados en SharePoint 
-    y cruzarlos con datos maestros de productos.
+    y cruzarlos con datos maestros de productos y codigo de pais.
     """
     # -------------------------------
     # 1. Leer y procesar los archivos de ventas
@@ -87,9 +102,6 @@ def sales_sharepoint(path_data_historica, path_data_product, path_data_country):
     # 4.1. Seleccionar columnas clave
     # -------------------------------
     df_sales_and_product.columns = df_sales_and_product.columns.str.strip()
-
-
-
     colum_sales=[
         # products
         'SKU', 'SKU Base', 'SKU Description', 'Brand', 'GPP Division Code',
@@ -110,12 +122,50 @@ def sales_sharepoint(path_data_historica, path_data_product, path_data_country):
     df_sales_and_product = df_sales_and_product.sort_values(by=['Date', 'Country', 'Brand'], ascending=[True, False, False])
     df_sales_and_product['Total Sales'] = pd.to_numeric(df_sales_and_product['Total Sales'])
     df_sales_and_product = df_sales_and_product[df_sales_and_product['Total Sales'] > 0]
-
+    #Se exporta csv a ruta de onedrive
     ruta_csv = r'C:\Users\SSN0609\OneDrive - Stanley Black & Decker\Dashboards LAG\Proyects\Forecast\sales_historical.csv'
     df_sales_and_product.to_csv(ruta_csv, index=False)
 
     print("se ejecuto correctamente sales_sharepoint")
     print("-------------------------------------------------------------------------------\n")
 
-sales_sharepoint(path_data_historica, path_data_product, path_data_country)
-print('fin ok')
+#sales_sharepoint(path_data_historica, path_data_product, path_data_country)
+
+
+#******************************************************************
+
+#==========================
+# Load data CSV
+#==========================
+
+#ruta=r'/home/sebastian/Documentos/programas/Forescast Work/sales_historical.csv'
+def historical_sales(ruta):
+    '''lectura del csv con la inf de venta historica:  este archivo csv es el resultado de unificar todos los xlsx de sharepoint,
+      filtrando las columnas de interes para el modelo
+    
+    Arg: ruta con la ubicacion del archivo csv con la informacion historica de venta
+    
+    return: dataframe(df_SalesAndProduct) agrupando la venta mensual, organizada por data,country y brand
+            y filtrando los valores positivos para realizar un pronostico de venta bruta
+    '''
+    #Lectura de csv
+    df_sales_and_product=pd.read_csv(ruta,index_col=None, header=0,dtype=str)
+
+    #Date en formato adecuado
+    #Elimina espacios en los nombres del col
+    #Se ordena por Date Country Code Brand
+    df_sales_and_product['Date']=pd.to_datetime(df_sales_and_product['Date'],format='%Y-%m-%d')
+    df_sales_and_product.columns=df_sales_and_product.columns.str.strip()
+    #Ordena por date, country and brand
+    df_sales_and_product = df_sales_and_product.sort_values(by=['Date', 'Country', 'Brand'], ascending=[True, False, False])
+    df_sales_and_product['Total Sales']=pd.to_numeric(df_sales_and_product['Total Sales'])
+    #Filtra por ventas brutas
+    df_sales_and_product=df_sales_and_product[df_sales_and_product['Total Sales']>0]
+
+    print("Se ejecuto correctamenteHistoricalSales")
+    print("-------------------------------------------------------------------------------\n")
+    return df_sales_and_product
+
+#df_SalesAndProduct=HistoricalSales(ruta)
+#print(df_SalesAndProduct.head())
+    
