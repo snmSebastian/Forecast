@@ -151,3 +151,19 @@ def graph_box(serie):
     print("Valores Atípicos (Outliers):\n")
     print(outliers)
     print("Se ejecuto correctamente: graph_box")    
+
+
+#==========================================================
+#--- Grafica de ventas historicas con el pronostico
+def graph_sales_forecast(train_data,test_data,predictions):
+      plt.figure(figsize=(12, 6))
+      plt.plot(train_data, label="Datos de Entrenamiento", color="blue")
+      plt.plot(test_data, label="Datos de Prueba", color="green")
+      plt.plot(predictions, label="Predicciones", color="orange", linestyle="--")
+      plt.axvline(x=train_data.index[-1], color="red", linestyle="--", label="Inicio de Predicciones")
+      plt.title("Comparativa: Entrenamiento, Prueba y Predicción")
+      plt.xlabel("Fecha")
+      plt.ylabel("Valores")
+      plt.legend()
+      plt.grid(True)
+      plt.show()

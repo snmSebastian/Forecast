@@ -46,7 +46,6 @@ def sales_sharepoint(path_data_historica, path_data_product, path_data_country):
     try:
          df_products = pd.read_excel(path_data_product, sheet_name='Master Product')
          df_country = pd.read_excel(path_data_country, sheet_name='Country Code')
-         df_fx_rate = pd.read_excel(path_data_country, sheet_name='FX Rate')
          print('se cargan los archivos de products, country y fx rate')
     except Exception as e:
          print(f"Error al leer los archivos: {e}")
@@ -156,12 +155,15 @@ def historical_sales(ruta):
     #Se ordena por Date Country Code Brand
     df_sales_and_product['Date']=pd.to_datetime(df_sales_and_product['Date'],format='%Y-%m-%d')
     df_sales_and_product.columns=df_sales_and_product.columns.str.strip()
-    #Ordena por date, country and brand
-    df_sales_and_product = df_sales_and_product.sort_values(by=['Date', 'Country', 'Brand'], ascending=[True, False, False])
-    df_sales_and_product['Total Sales']=pd.to_numeric(df_sales_and_product['Total Sales'])
     #Filtra por ventas brutas
+    df_sales_and_product['Total Sales']=pd.to_numeric(df_sales_and_product['Total Sales'])
     df_sales_and_product=df_sales_and_product[df_sales_and_product['Total Sales']>0]
 
+    #Ordena por date, country and brand
+    df_sales_and_product = df_sales_and_product.sort_values(
+        by=['Date', 'Country', 'Brand'],
+        ascending=[True, False, False])
+    
     print("Se ejecuto correctamenteHistoricalSales")
     print("-------------------------------------------------------------------------------\n")
     return df_sales_and_product

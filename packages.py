@@ -16,9 +16,11 @@ import re  # Operaciones con expresiones regulares (búsqueda y manipulación de
 # Operaciones numéricas y arreglos
 import numpy as np  # Realiza cálculos numéricos y manejo de arreglos
 from itertools import product # genera todas las combinaciones posibles de parámetros a partir de los rangos proporcionados
+import itertools
 
 # Manipulación y análisis de datos
 import pandas as pd  # Trabaja con estructuras de datos como DataFrames y series
+import  random
 
 # Manejo de fechas y horas
 from datetime import datetime, timedelta  # Manipulación de fechas y cálculos temporales
@@ -38,13 +40,13 @@ from statsmodels.tsa.seasonal import seasonal_decompose  # Descomposición de se
 # Machine Learning (regresión y predicción)
 from sklearn.linear_model import LinearRegression  # Modelos de regresión lineal
 from sklearn.metrics import mean_absolute_error #para calcular el error absoluto medio (MAE) entre predicciones y valores reales
-
-
-
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import mean_squared_error
 # Modelado avanzado con ARIMA (pmdarima)
 import pmdarima  # Herramientas avanzadas para modelos ARIMA
 from pmdarima import ARIMA  # Modelado ARIMA
-from pmdarima import auto_arima  # Selección automática de parámetros para ARIMA
+from pmdarima import auto_arima 
+import warnings # Selección automática de parámetros para ARIMA
 
 # Skforecast (modelos SARIMAX y backtesting)
 import skforecast  # Biblioteca para series temporales con modelos SARIMAX

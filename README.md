@@ -3,13 +3,13 @@ Este repositorio contiene el codigo desarrollado para el modelo de prediccion de
 
 packages.py: Se genera un archivo con todas los paquetes-librerias y modulos que seran usados
 
-data_loading.py: COntiene las funciones para cargar y procesar la informacion tanto de sharepoint como csv.
+data_loading.py: Contiene dos funciones para cargar y procesar la informacion tanto de sharepoint como csv.
 
     historical_sales:  lectura del csv con la inf de venta historica:  este archivo csv es el resultado de unificar        todos  los xlsx de sharepoint,filtrando las columnas de interes para el modelo
     
     Arg: ruta con la ubicacion del archivo csv con la informacion historica de venta
     
-    return: dataframe(df_SalesAndProduct) agrupando la venta mensual, organizada por data,country y brand
+    return: dataframe(df_sales_and_product) agrupando la venta mensual, organizada por data,country y brand
             y filtrando los valores positivos para realizar un pronostico de venta bruta
 
     sales_sharepoint:Función para procesar los datos de ventas desde archivos XLSX alojados en SharePoint 
@@ -27,6 +27,7 @@ data_loading.py: COntiene las funciones para cargar y procesar la informacion ta
     Args:
     paht_data_historica (str): Ruta a la carpeta con archivos de ventas en formato XLSX.
     paht_data_product (str): Ruta al archivo maestro de productos en formato XLSX.
+    path_data_country(str): Ruta al archivo con los codigos de paises
 
     Returns:
     pd.DataFrame: DataFrame combinado de ventas y productos

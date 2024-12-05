@@ -3,7 +3,7 @@
 #=======================
 from packages import SARIMAX
 from packages import plt
-
+from packages import warnings
 
 #========================================================
 #--- Definicion de los modelos finales
@@ -31,6 +31,9 @@ def model_sarima(best_params,serie):
     #con el cual entrenar el modelo autorima
 
     p, d, q,P, D, Q, s=best_params
+    #Ignora los mensajes de alearta al entrenar el modelo
+    warnings.filterwarnings("ignore")
+    
     # Generar predicciones con un modelo específico
     try:
         model = SARIMAX(
@@ -40,7 +43,9 @@ def model_sarima(best_params,serie):
         enforce_stationarity=False,
         enforce_invertibility=False,
         disp=0
-        ).fit()
+        ).fit(disp=0)
+        #retorna los mensajes de alerta
+        warnings.filterwarnings("default")
         # Generar predicciones a futuro con forecast
         forecast_steps = 12  # Predecir los próximos 12 meses
         forecast = model.forecast(steps=forecast_steps)
@@ -57,6 +62,8 @@ def model_sarima(best_params,serie):
         #plt.show()
 
         print(f"Pronóstico generado correctamente para los próximos {forecast_steps} meses.")
+        #retorna los mensajes de alerta
+        warnings.filterwarnings("default")
         return forecast
     except ValueError as e:
         print(f"Error en predicción: {e}")

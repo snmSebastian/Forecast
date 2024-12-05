@@ -3,10 +3,11 @@
 #--- Paquetes
 #=================
 import warnings
-warnings.filterwarnings("ignore", category=RuntimeWarning)
 from packages import auto_arima
 from packages import product
-
+from packages import mean_absolute_error
+from packages import itertools
+from packages import SARIMAX
 
 #====================================================================
 #--- Obitiene los mejores parametros de la serie segun Autoarima
@@ -33,7 +34,8 @@ def best_parameters_auto_arima(train_data):
     #train_data, val_data, test_data, train_data_est, val_data_est, test_data_est = Data_Model(serie)
 
     # Ignorar advertencias para mantener limpio el output
-    warnings.filterwarnings("ignore")
+    warnings.filterwarnings("ignore", category=UserWarning, message='Non-invertible|Non-stationary')
+
 
     #Realizar autoarima
     auto_model = auto_arima(train_data,
@@ -71,9 +73,7 @@ def best_parameters_auto_arima(train_data):
     '''
     print("Se ejecuto correctamente: best_parameters_auto_arima")
     print("-------------------------------------------------------------------------------\n")
-
     return p_range, d_range, q_range, P_range, D_range, Q_range, s
-
 
 #==========================================================================
 #--- Genera rango alrededor de los mejores parametros Autoarima

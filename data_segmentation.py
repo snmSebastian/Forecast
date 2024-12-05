@@ -57,3 +57,22 @@ def select_data(serie_sales,serie,\
         return train_data,test_data
 
 
+def data_model2(serie):
+    ''' 
+    Segmenta una serie en conjuntos de entrenamiento, validación y prueba, y genera versiones estacionalizadas.
+
+    Args: 
+        serie (pd.Series): Serie temporal a segmentar.
+    
+    Returns:
+        tuple: Conjuntos originales y estacionalizados (train, validation, test).
+    '''
+    size_data_train=int(len(serie)*0.7)
+   
+   
+    train_data=serie[:size_data_train]
+    test_data=serie[size_data_train:]
+    print("Se ejecuto correctamente: data_model2")
+    print("-------------------------------------------------------------------------------\n")
+
+    return train_data,test_data

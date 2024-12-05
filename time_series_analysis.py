@@ -3,7 +3,6 @@
 #======================
 
 from packages import adfuller  # Prueba de estacionariedad para series temporales
-from packages import np
 from packages import sm
 
 
@@ -12,27 +11,57 @@ from packages import sm
 #==============================================
 
 def time_serie(df, filtros):
+    
+    
     """
-    Filtra los datos de ventas según los filtros especificados y devuelve una serie de tiempo.
+    Filtra los datos de ventas según los filtros especificados y devuelve una serie de tiempo por categoría.
+    
     Args:
         df (pd.DataFrame): DataFrame con datos de ventas.
         filtros (dict): Diccionario de condiciones para filtrar.
-    Returns:
-        pd.Series: Serie de tiempo de ventas filtrada.
-    """
-    for clave, valor in filtros.items():
-        df = df[df[clave] == valor]
         
-    df = df.groupby(df['Date'].dt.to_period('M'))['Total Sales'].sum().reset_index()
-    df['Date'] = df['Date'].dt.to_timestamp()
-    serie = df.set_index('Date')['Total Sales']
-    serie = serie.asfreq('MS')
-    series_sales=serie.copy()
-    print("Se ejecuto correctamente: time_serie")
-    print("-------------------------------------------------------------------------------\n")
+    Returns:
+        dict: Diccionario con series de tiempo, una por cada valor de 'Category Group'.
+    """
 
-    return  series_sales,serie
 
+    try:
+        # Filtrar el DataFrame según el país y las categorías proporcionadas
+        df_filtrado = df[
+            (df['Country'] == filtros['Country']) & 
+            (df['Category Group'].isin(filtros['Category Group']))&
+            (df['Total Sales']>0)
+        ]
+
+        # Crear un diccionario para almacenar las series de tiempo
+        series_dict={}
+        series_sales_dict={}
+        # Agrupar por categoría y generar la serie de tiempo por cada categoría
+        for category in filtros['Category Group']:
+            df_categoria = df_filtrado[df_filtrado['Category Group'] == category]
+        
+            if not df_categoria.empty:
+                # Agrupar las ventas por mes
+                df_grouped = (
+                    df_categoria
+                    .groupby(df_categoria['Date'].dt.to_period('M'))['Total Sales']
+                    .sum()
+                    .reset_index()
+                )
+                df_grouped['Date'] = df_grouped['Date'].dt.to_timestamp()
+            
+                # Crear la serie de tiempo
+                serie = df_grouped.set_index('Date')['Total Sales']
+                serie = serie.asfreq('MS')  # Frecuencia mensual
+            
+                # Guardar la serie en el diccionario
+                series_dict[category] = serie
+        series_sales_dict=series_dict.copy()    
+        print("Se ejecutó correctamente: time_serie")
+        print("-------------------------------------------------------------------------------\n")
+        return series_sales_dict,series_dict
+    except Exception as e:
+        print(f"Error en la generación de series de tiempo: {e}")
 #==============================================
 # --- Estacionarizacion series
 #=============================================     
@@ -50,41 +79,26 @@ def seasonalize_series(serie):
     Returns:
         pd.Series: Serie estacionaria con p-valor (ADF) < p_threshold, o la serie diferenciada al máximo permitido.
     ''' 
-    serie_copy=serie.copy()
-    len_serie=len(serie_copy)
     diff_order = 0  # Contador de diferenciaciones
     min_observations= len(serie)-48
-    max_diff= len(serie)-12
+    max_diff= 12
     p_threshold=0.05
     p_value = adfuller(serie)[1]
     print(f"{'La serie de ventas pasó la prueba de Dickey-Fuller y es estacionaria.' if p_value < p_threshold else 'La serie de ventas no pasó la prueba de Dickey-Fuller y no es estacionaria.'}")
     
     while diff_order < max_diff and len(serie) >= min_observations:
-        print("1")
         # Prueba de Dickey-Fuller aumentada
         p_value = adfuller(serie)[1]
         if p_value <= p_threshold:
-            print("la serie es estacionaria")
-            if len(serie)<len_serie:         
-                    #print("se devuelve la serie estacionalizada")
-                    # Devuelve la serie diferenciada o en su mejor estado
-                    #print(f'serie inicial:{len(serie_copy)}\n')
-                    #print(f'serie final:{len(serie)}\n')
-                    print("Se ejecuto correctamente: seasonalize_serie")
-                    #print(f"Máximo de diferenciaciones alcanzado: {diff_order}")
-                    print("-------------------------------------------------------------------------------\n")
-            else:                    
-                    print("Se ejecuto correctamente: seasonalize_serie")
-                    print("se devuelve la serie original")
-                    print("-------------------------------------------------------------------------------\n")
+            print(f'se estacionarizo la serie con {diff_order} diferenciaciones')
             return serie
         
         # Aplicar diferenciación
         serie = serie.diff().dropna()
         diff_order += 1
-        #print(f'se diferencia la serie por {diff_order} vez')
-
-
+    # Si no pasa la prueba ADF, devuelve la serie diferenciada
+    print("La serie no se estacionarizó completamente, pero se alcanzó el máximo permitido.")
+    return serie
 #====================================
 #--- Data frame Agrupado por country - category group -date
 
@@ -112,9 +126,6 @@ def forecast_data(df_sales_and_product):
     print("-------------------------------------------------------------------------------\n")
 
     return  df_sales_forecast
-
-
-
 
 
 #==============================
@@ -168,5 +179,4 @@ def time_series_metrics(serie):
         "ADF Test": sm.tsa.adfuller(serie)[1], 
           # p-value
     }
-
 
