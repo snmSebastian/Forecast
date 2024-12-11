@@ -13,32 +13,23 @@ from packages import SARIMAX
 #--- Obitiene los mejores parametros de la serie segun Autoarima
 #====================================================================
 
-def best_parameters_auto_arima(train_data):
+def best_parameters_auto_arima(serie):
     
-    ''' Recibe una serie estacionarizada, realiza un proceso autoarima para obtener los mejores parametros para:p,d,q,P,D,Q,s
-    con base en estos valores establece los rangos que seran usados en la optimizacion de hiperparametros por medio de 
-    gridsearch
+    ''' Recibe una serie, realiza un proceso autoarima para obtener los mejores parametros para:p,d,q,P,D,Q,s
 
     Parámetros:
-        serie (pd.Series): Serie estacionarizada 
+        serie (pd.Series): Serie 
 
     Retorna:
-        tuple: Rangos para los parámetros p, d, q, P, D, Q y s.
+        tuple: best_params_arima: parametros p,d,q
+                best_seasonal_params_arima: parametros P,D,Q,s
     '''
-
-
-    #Identifica si se esta trabajando con la serie original o la estacionarizada, con base en esto elige el conjunto train
-    #con el cual entrenar el modelo autorima
-    
-    # Dividir la serie en conjuntos de entrenamiento, validación y prueba
-    #train_data, val_data, test_data, train_data_est, val_data_est, test_data_est = Data_Model(serie)
-
     # Ignorar advertencias para mantener limpio el output
     warnings.filterwarnings("ignore", category=UserWarning, message='Non-invertible|Non-stationary')
 
 
     #Realizar autoarima
-    auto_model = auto_arima(train_data,
+    auto_model = auto_arima(serie,
                         seasonal=True,
                         m=12,  # Periodo estacional
                         trace=False,  # Muestra el progreso
@@ -46,54 +37,56 @@ def best_parameters_auto_arima(train_data):
                         suppress_warnings=True,
                         stepwise=True)
 
-# Obtén los parámetros recomendados
-    best_params = auto_model.get_params()['order']
-    best_seasonal_params = auto_model.get_params()['seasonal_order']
+    # Obtén los parámetros recomendados
+    best_params_arima = auto_model.get_params()['order']
+    best_seasonal_params_arima = auto_model.get_params()['seasonal_order']
 
     #print(f"Parámetros recomendados por AutoARIMA: {best_params}, {best_seasonal_params}")
+    return best_params_arima,best_seasonal_params_arima
 
-    # Define rangos reducidos basados en AutoARIMA
-    p_range = range(max(0, best_params[0] - 1), best_params[0] + 2)
-    d_range = [best_params[1]]  # Usualmente no necesitas variar mucho `d`
-    q_range = range(max(0, best_params[2] - 1), best_params[2] + 2)
+#==============================================================
+#--- Genera una cuadricula de parametros
+#==============================================================
 
-    P_range = range(max(0, best_seasonal_params[0] - 1), best_seasonal_params[0] + 2)
-    D_range = [best_seasonal_params[1]]  # Similar a `d`, no suele variar mucho
-    Q_range = range(max(0, best_seasonal_params[2] - 1), best_seasonal_params[2] + 2)
-    s = [best_seasonal_params[3]]  # Período fijo
+def generate_param_grid(best_params_arima,best_seasonal_params_arima):
 
-    '''
-    print(f'p_range: {p_range}')
-    print(f'd_range: {d_range}')
-    print(f'q_range: {q_range}')
-    print(f'P_range: {P_range}')
-    print(f'D_range: {D_range}')
-    print(f'Q_range: {Q_range}')
-    print(f's_range: {s}')
-    '''
-    print("Se ejecuto correctamente: best_parameters_auto_arima")
-    print("-------------------------------------------------------------------------------\n")
-    return p_range, d_range, q_range, P_range, D_range, Q_range, s
-
-#==========================================================================
-#--- Genera rango alrededor de los mejores parametros Autoarima
-#==========================================================================
-
-def generate_param_grid(p_range, d_range, q_range, P_range, D_range, Q_range, s_range):
     """
-    Genera todas las combinaciones posibles de hiperparámetros para el modelo SARIMAX.
+    Genera todas las combinaciones posibles de los mejores parametros obtenidos de Autoarima .
     
     Parámetros:
-    - p_range, d_range, q_range: Rango de los parámetros ARIMA (p, d, q).
-    - P_range, D_range, Q_range: Rango de los parámetros estacionales (P, D, Q).
-    - s_range: Rango del período estacional (s).
-    
+    - best_params_arima: parametros p,d,q
+      best_seasonal_params_arima: parametros P,D,Q,s
     Retorna:
     - param_grid: Lista de combinaciones de parámetros.
     """
-    param_grid = list(product(p_range, d_range, q_range, P_range, D_range, Q_range, s_range))
+    p_range = range(max(0, best_params_arima[0] - 2), best_params_arima[0] + 4)
+    d_range = [best_params_arima[1]]
+    q_range = range(max(0, best_params_arima[2] - 2), best_params_arima[2] + 4)
+
+    P_range = range(max(0, best_seasonal_params_arima[0] - 2), best_seasonal_params_arima[0] + 4)
+    D_range = [best_seasonal_params_arima[1]]
+    Q_range = range(max(0, best_seasonal_params_arima[2] - 2), best_seasonal_params_arima[2] + 4)
+    s_range = [best_seasonal_params_arima[3]]
+
+    trend = [None, 'n', 'c']  # Si "trend" no es necesario, remuévelo
+    param_grid = {
+        'order': list(product(p_range, d_range, q_range)),
+        'seasonal_order': list(product(P_range, D_range, Q_range, s_range)),
+        'trend': trend
+    }
+
+    #FIltra p,d,q P,D,Q,s!=0
+    param_grid['order'] = [order for order in param_grid['order'] if order != (0, 0, 0)]
+    param_grid['seasonal_order'] = [s_order for s_order in param_grid['seasonal_order'] if s_order[:3] != (0, 0, 0)]
+    
+    #Filtra p,d,q,P,D,Q,s cuya suma sea menor 24
+    valid_params = [
+        params for params in param_grid['order']
+        if sum(params) < 24 # Requisito para que el modelo pueda ajustarse
+        ]
+    param_grid['order'] = valid_params
+    
     print("Se ejecuto correctamente: generate_param_grid")
     print("-------------------------------------------------------------------------------\n")
-
     return param_grid
 

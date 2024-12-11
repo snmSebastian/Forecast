@@ -3,7 +3,7 @@
 #======================
 
 from packages import adfuller  # Prueba de estacionariedad para series temporales
-from packages import sm
+from packages import sm,np
 
 
 #==============================================
@@ -14,14 +14,16 @@ def time_serie(df, filtros):
     
     
     """
-    Filtra los datos de ventas según los filtros especificados y devuelve una serie de tiempo por categoría.
-    
+    Genera series de tiempo por categoría, filtradas por país y grupo de categorías.
+
     Args:
-        df (pd.DataFrame): DataFrame con datos de ventas.
-        filtros (dict): Diccionario de condiciones para filtrar.
-        
+        df (pd.DataFrame): DataFrame con los datos de ventas.
+        filters (dict): Filtros para seleccionar país y grupos de categorías. 
+                        Ejemplo: {'Country': 'USA', 'Category Group': ['A', 'B']}
+
     Returns:
-        dict: Diccionario con series de tiempo, una por cada valor de 'Category Group'.
+        dict: Diccionario con series de tiempo para cada categoría.
+        dict: Diccionario con datos originales sin preprocesar por categoría.
     """
 
 
@@ -29,8 +31,7 @@ def time_serie(df, filtros):
         # Filtrar el DataFrame según el país y las categorías proporcionadas
         df_filtrado = df[
             (df['Country'] == filtros['Country']) & 
-            (df['Category Group'].isin(filtros['Category Group']))&
-            (df['Total Sales']>0)
+            (df['Category Group'].isin(filtros['Category Group']))
         ]
 
         # Crear un diccionario para almacenar las series de tiempo
@@ -62,45 +63,6 @@ def time_serie(df, filtros):
         return series_sales_dict,series_dict
     except Exception as e:
         print(f"Error en la generación de series de tiempo: {e}")
-#==============================================
-# --- Estacionarizacion series
-#=============================================     
-def seasonalize_series(serie):
-    '''
-    Estacionariza la serie de entrada para eliminar tendencias mediante diferenciaciones sucesivas 
-    hasta que pase la prueba de ADF o se alcancen las restricciones definidas.
-
-    Args:
-        serie (pd.Series): Serie temporal a estacionarizar.
-        max_diff (int): Máximo número de diferenciaciones permitidas (default=12).
-        min_observations (int): Mínima cantidad de observaciones requeridas después de diferenciar (default=24).
-        p_threshold (float): Umbral para el p-valor de la prueba ADF (default=0.05).
-
-    Returns:
-        pd.Series: Serie estacionaria con p-valor (ADF) < p_threshold, o la serie diferenciada al máximo permitido.
-    ''' 
-    diff_order = 0  # Contador de diferenciaciones
-    min_observations= len(serie)-48
-    max_diff= 12
-    p_threshold=0.05
-    p_value = adfuller(serie)[1]
-    print(f"{'La serie de ventas pasó la prueba de Dickey-Fuller y es estacionaria.' if p_value < p_threshold else 'La serie de ventas no pasó la prueba de Dickey-Fuller y no es estacionaria.'}")
-    
-    while diff_order < max_diff and len(serie) >= min_observations:
-        # Prueba de Dickey-Fuller aumentada
-        p_value = adfuller(serie)[1]
-        if p_value <= p_threshold:
-            print(f'se estacionarizo la serie con {diff_order} diferenciaciones')
-            return serie
-        
-        # Aplicar diferenciación
-        serie = serie.diff().dropna()
-        diff_order += 1
-    # Si no pasa la prueba ADF, devuelve la serie diferenciada
-    print("La serie no se estacionarizó completamente, pero se alcanzó el máximo permitido.")
-    return serie
-#====================================
-#--- Data frame Agrupado por country - category group -date
 
 def forecast_data(df_sales_and_product):
     """
@@ -180,3 +142,32 @@ def time_series_metrics(serie):
           # p-value
     }
 
+def preprocess_series(serie):
+    """
+    Realiza un preprocesamiento básico para estacionarizar la serie.
+    - Aplica diferencia regular y estacional si es necesario.
+    - Transforma con logaritmo para estabilizar la varianza si la serie tiene valores positivos.
+
+    Args:
+        serie (pd.Series): Serie temporal original.
+
+    Returns:
+        pd.Series: Serie transformada.
+    """
+    try:
+        # Logaritmo si la serie tiene valores positivos
+        if (serie > 0).all():
+            serie = np.log(serie)
+
+        # Diferencias regulares para eliminar tendencia
+        diff_serie = serie.diff().dropna()
+
+        # Diferencias estacionales para eliminar estacionalidad
+        diff_serie = diff_serie.diff(12).dropna()
+
+        print("Se ejecutó correctamente: preprocess_series")
+        print("-------------------------------------------------------------------------------\n")
+        return diff_serie
+    except Exception as e:
+        print(f"Error en el preprocesamiento de la serie: {e}")
+        return None
