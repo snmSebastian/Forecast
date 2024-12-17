@@ -1,21 +1,27 @@
-from parameters_optimization import best_parameters_auto_arima,generate_param_grid
+#==========================
+#--- Paquetes
+#==========================
 from packages import Sarimax,grid_search_sarimax,ForecasterSarimax,TimeSeriesFold,backtesting_sarimax
-from data_segmentation import data_model2
-from time_series_analysis import time_serie
-
-"""
-Constructor de la clase para inicializar la serie de tiempo.
-"""
-#serie=time_serie
-#train_data,test_data = data_model2(serie) # Usando la función data_model2
-
-def semilla(serie):
-    best_params_arima,best_seasonal_params_arima=best_parameters_auto_arima(serie)
-    param_grid=generate_param_grid(best_params_arima,best_seasonal_params_arima)
-    return param_grid
 
 
-def grid_search_sarimax_train(serie,param_grid):
+#===================
+#--- GridSearch
+#===================
+def perform_grid_search(serie,param_grid):
+    """
+    Realiza una búsqueda de rejilla (Grid Search) para encontrar las mejores combinaciones de parámetros
+    para un modelo SARIMAX utilizando validación cruzada.
+
+    Args:
+        serie (pd.Series): Serie temporal sobre la que se ajustará el modelo.
+        param_grid (list[dict]): Lista de combinaciones de parámetros a evaluar. Cada diccionario debe incluir:
+            - `order` (tuple): Parámetros (p, d, q) para SARIMAX.
+            - `seasonal_order` (tuple): Parámetros (P, D, Q, s) para la estacionalidad.
+
+    Returns:
+        pd.DataFrame or None: Resultados del Grid Search, ordenados por la métrica seleccionada. 
+        Si ocurre un error, devuelve `None`.
+    """
     forecaster = ForecasterSarimax(
     regressor=Sarimax(
     order=(1, 1, 1),
@@ -53,14 +59,30 @@ def grid_search_sarimax_train(serie,param_grid):
         return resultados_grid
         
 
-def best_params_sarimax(resultados_grid, top_n=10):
+#==========================================
+#--- Top10 best parameters by gridsearch
+#==========================================
+def get_best_sarimax_parameters(resultados_grid):
     """
-    Extrae las combinaciones de parámetros del top N resultados de `resultados_grid`.
+    Selecciona las combinaciones de parámetros más prometedoras (basadas en el MAE) 
+    del Grid Search.
+
+    Args:
+        resultados_grid (pd.DataFrame): Resultados del Grid Search, con columnas:
+            - `order`: Parámetros (p, d, q) del modelo SARIMAX.
+            - `seasonal_order`: Parámetros (P, D, Q, s) para la estacionalidad.
+            - `mean_absolute_error`: MAE asociado a cada combinación de parámetros.
+
+    Returns:
+        list[dict]: Lista de las mejores combinaciones de parámetros. Cada diccionario incluye:
+            - `order` (tuple): Parámetros del modelo SARIMAX.
+            - `seasonal_order` (tuple): Parámetros para la estacionalidad.
     """
     #   Ordenar los resultados por MAE (por si acaso no vienen ordenados)
     resultados_grid_sorted = resultados_grid.sort_values('mean_absolute_error')
 
     # Seleccionar el top N de las mejores combinaciones
+    top_n=10
     top_rows = resultados_grid_sorted.head(top_n)
     top_params = []
     for _, row in top_rows.iterrows():
@@ -73,8 +95,10 @@ def best_params_sarimax(resultados_grid, top_n=10):
 
     return top_params
 
-        
-def predictions_train(serie, top_params):
+#====================
+# --- Backtesting 
+#====================
+def run_backtesting(serie, top_params):
     """
     Realiza backtesting con todas las opciones de parámetros en top_params y devuelve el diccionario 
     con los mejores resultados (MAE).
@@ -84,7 +108,7 @@ def predictions_train(serie, top_params):
     Returns:
     - mejores_resultados: Diccionario con los parámetros y MAE del mejor modelo.
     """
-    mejores_resultados = {
+    best_results_backtesting = {
     'params': None,
     'mae': float('inf')  # Inicializamos con un valor muy alto
         }
@@ -122,35 +146,15 @@ def predictions_train(serie, top_params):
             mae = resultados[0]['mean_absolute_error'].iloc[0]  # Si 'backtesting_sarimax' devuelve un DataFrame o lista, extrae el MAE
             print(f'resultado [0]:{mae}')
             # Asegúrate de que `mae` es un valor numérico
-            if  mae < mejores_resultados['mae']:
-                mejores_resultados['mae'] = mae
-                mejores_resultados['params'] = params_dict
+            if  mae < best_results_backtesting['mae']:
+                best_results_backtesting['mae'] = mae
+                best_results_backtesting['params'] = params_dict
                 print(f'se actualizaron resultados:{mae}-{params_dict}')
             #print(resultados)
             #return resultados
         except Exception as e:
             resultados=None
-            mejores_resultados=None
+            best_results_backtesting=None
             print(f"Error al ajustar el modelo con parámetros {params_dict}: {e}")
     
-    return resultados,mejores_resultados
-
-def predictions_final_model(serie, mejores_resultados):
-        """
-        Ajusta el modelo final con los mejores parámetros y realiza predicciones.
-        """
-        forecaster = ForecasterSarimax(
-            regressor=Sarimax(
-                order=mejores_resultados['params']['order'],
-                seasonal_order=mejores_resultados['params']['seasonal_order'],
-                trend=mejores_resultados['params'].get('trend', None),
-                maxiter=500
-            )
-        )
-
-        # Ajustar el modelo final
-        forecaster.fit(serie)
-        
-        # Realizar predicciones
-        predicciones = forecaster.predict(steps=12)
-        return predicciones
+    return resultados,best_results_backtesting

@@ -21,7 +21,7 @@ from packages import plt
 from packages import np
 from packages import LinearRegression
 
-from time_series_analysis import seasonalize_series
+from preprocessing.time_series_analysis import seasonalize_series
 #================================================================
 def graph_tendence(serie_sales):
 

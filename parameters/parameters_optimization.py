@@ -5,16 +5,12 @@
 import warnings
 from packages import auto_arima
 from packages import product
-from packages import mean_absolute_error
-from packages import itertools
-from packages import SARIMAX
 
 #====================================================================
 #--- Obitiene los mejores parametros de la serie segun Autoarima
 #====================================================================
 
-def best_parameters_auto_arima(serie):
-    
+def best_parameters_auto_arima(serie): 
     ''' Recibe una serie, realiza un proceso autoarima para obtener los mejores parametros para:p,d,q,P,D,Q,s
 
     Parámetros:
@@ -68,7 +64,7 @@ def generate_param_grid(best_params_arima,best_seasonal_params_arima):
     Q_range = range(max(0, best_seasonal_params_arima[2] - 2), best_seasonal_params_arima[2] + 4)
     s_range = [best_seasonal_params_arima[3]]
 
-    trend = [None, 'n', 'c']  # Si "trend" no es necesario, remuévelo
+    trend = [None, 'n', 'c']  
     param_grid = {
         'order': list(product(p_range, d_range, q_range)),
         'seasonal_order': list(product(P_range, D_range, Q_range, s_range)),
