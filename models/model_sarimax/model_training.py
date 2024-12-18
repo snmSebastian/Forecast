@@ -149,7 +149,7 @@ def run_backtesting(serie, top_params):
             if  mae < best_results_backtesting['mae']:
                 best_results_backtesting['mae'] = mae
                 best_results_backtesting['params'] = params_dict
-                print(f'se actualizaron resultados:{mae}-{params_dict}')
+                #print(f'se actualizaron resultados:{mae}-{params_dict}')
             #print(resultados)
             #return resultados
         except Exception as e:

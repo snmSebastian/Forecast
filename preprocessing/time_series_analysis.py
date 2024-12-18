@@ -85,14 +85,15 @@ def preprocess_series(serie):
             serie = np.log(serie)
 
         # Diferencias regulares para eliminar tendencia
-        diff_serie = serie.diff().dropna()
+        diff_serie_tendencia = serie.diff().dropna()
 
         # Diferencias estacionales para eliminar estacionalidad
-        diff_serie = diff_serie.diff(12).dropna()
+        diff_serie_estacionalidad = diff_serie_tendencia.diff(12).dropna()
+        transfor_serie=diff_serie_estacionalidad
 
-        print("Se ejecutó correctamente: preprocess_series")
-        print("-------------------------------------------------------------------------------\n")
-        return diff_serie
+        #print("Se ejecutó correctamente: preprocess_series")
+        #print("-------------------------------------------------------------------------------\n")
+        return transfor_serie,diff_serie_tendencia,diff_serie_estacionalidad
     except Exception as e:
-        print(f"Error en el preprocesamiento de la serie: {e}")
-        return None
+        #print(f"Error en el preprocesamiento de la serie: {e}")
+        return None,None,None

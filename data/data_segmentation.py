@@ -14,7 +14,7 @@ def data_model(serie):
     size_data_train=46
     train_data=serie[:size_data_train]
     test_data=serie[size_data_train:]
-    print("Se ejecuto correctamente: data_model2")
+    print("Se ejecuto correctamente: data_model")
     print("-------------------------------------------------------------------------------\n")
 
     return train_data,test_data
@@ -43,7 +43,7 @@ def forecast_data(df_sales_and_product):
     df_sales_forecast['Modelo']='Historico'
     df_sales_forecast['mae']=0
     print("Se ejecuto correctamente: forecast data1")
-    #print(df_sales_forecast.head())
+    print(df_sales_forecast.head())
     print("-------------------------------------------------------------------------------\n")
 
     return  df_sales_forecast

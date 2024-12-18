@@ -171,8 +171,8 @@ def historical_sales(ruta):
         by=['Date', 'Country', 'Brand'],
         ascending=[True, False, False])
     
-    print("Se ejecuto correctamenteHistoricalSales")
-    print("-------------------------------------------------------------------------------\n")
+    #print("Se ejecuto correctamenteHistoricalSales")
+    #print("-------------------------------------------------------------------------------\n")
     return df_sales_and_product
 
 #df_SalesAndProduct=HistoricalSales(ruta)
