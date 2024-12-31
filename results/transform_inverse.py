@@ -1,8 +1,8 @@
 from packages import pd,np
 def inverse_transform(original_serie,diff_serie_tendencia,diff_serie_estacionalidad,predictions):
     diff_serie_tendencia=diff_serie_tendencia[:12]
-    from results import concat,concat2
-    series_concats=concat(diff_serie_tendencia,diff_serie_estacionalidad,predictions)
+    from results import concat_series_df
+    series_concats=concat_series_df(diff_serie_tendencia,diff_serie_estacionalidad,predictions)
     for i in range(len(series_concats)):
         if i >=12:
             series_concats.loc[i,"venta"] += series_concats.loc[ i-12,"venta"]
@@ -11,7 +11,7 @@ def inverse_transform(original_serie,diff_serie_tendencia,diff_serie_estacionali
     first_value = np.log(original_serie.iloc[0])
     # Crear el DataFrame con columnas "date" y "venta"
     df_first_value = pd.DataFrame({"date": [original_serie.index[0]], "venta": [first_value]})
-    serie_tendencia_inversa=concat2(df_first_value,series_concats)
+    serie_tendencia_inversa=concat_series_df(df_first_value,series_concats)
 
     for i in range(len(serie_tendencia_inversa)):
         if i >=1:

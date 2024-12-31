@@ -16,9 +16,10 @@ def sarimax_model(serie):
     #print("perfom_:grid_search")
     top_params=get_best_sarimax_parameters(resultados_grid)
     #print("get best sarimaz")
-    resultados,best_results_backtesting=run_backtesting(transfor_serie, top_params)
+    best_results_backtesting=run_backtesting(transfor_serie, top_params)
     #print("backstesting")
     predictions=fit_final_model_and_predict(transfor_serie, best_results_backtesting)
     #print("final model")
     df_predict=inverse_transform(serie,diff_serie_tendencia,diff_serie_estacionalidad,predictions)
-    return df_predict
+    
+    return df_predict,best_results_backtesting

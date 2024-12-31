@@ -2,7 +2,7 @@
 #--- Paquetes
 #==========================
 from packages import Sarimax,grid_search_sarimax,ForecasterSarimax,TimeSeriesFold,backtesting_sarimax
-
+from packages import np,pd
 
 #===================
 #--- GridSearch
@@ -110,11 +110,12 @@ def run_backtesting(serie, top_params):
     """
     best_results_backtesting = {
     'params': None,
-    'mae': float('inf')  # Inicializamos con un valor muy alto
+    'mae': float('inf'),  # Inicializamos con un valor muy alto
+    'mape': None  # Porcentaje de error relativo
         }
 
     for params_dict in top_params:
-        print(params_dict)
+        #print(params_dict)
         forecaster = ForecasterSarimax(
                 regressor=Sarimax(
                     order=params_dict['order'],
@@ -136,19 +137,24 @@ def run_backtesting(serie, top_params):
                 forecaster=forecaster,
                 y=serie,
                 cv=cv,
-                metric='mean_absolute_error',
+                metric=['mean_absolute_error','mean_absolute_percentage_error'],
                 n_jobs="auto",
                 suppress_warnings_fit=True,
                 verbose=False,
                 show_progress=True
             )
+        
+
+
+            mae = resultados[0]['mean_absolute_error'].iloc[0]  # Extrae el MAE
+            mape=resultados[0]['mean_absolute_percentage_error'].iloc[0]
             
-            mae = resultados[0]['mean_absolute_error'].iloc[0]  # Si 'backtesting_sarimax' devuelve un DataFrame o lista, extrae el MAE
-            print(f'resultado [0]:{mae}')
-            # Asegúrate de que `mae` es un valor numérico
+
+
             if  mae < best_results_backtesting['mae']:
                 best_results_backtesting['mae'] = mae
                 best_results_backtesting['params'] = params_dict
+                best_results_backtesting['mape'] = mape
                 #print(f'se actualizaron resultados:{mae}-{params_dict}')
             #print(resultados)
             #return resultados
@@ -157,4 +163,4 @@ def run_backtesting(serie, top_params):
             best_results_backtesting=None
             print(f"Error al ajustar el modelo con parámetros {params_dict}: {e}")
     
-    return resultados,best_results_backtesting
+    return best_results_backtesting

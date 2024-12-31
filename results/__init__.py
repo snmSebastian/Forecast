@@ -1,2 +1,2 @@
-from .combine_series_to_dataframe import concat,concat2
+from .combine_series_to_dataframe import concat_series_df,concat_result
 from .transform_inverse import inverse_transform

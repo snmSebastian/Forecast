@@ -1,39 +1,6 @@
 from packages import pd
-def concat(*args):
-    """
-    Combina múltiples series y/o DataFrames en un único DataFrame, con las columnas 'date' y 'venta'.
-    
-    Parámetros:
-    *args: Series o DataFrames donde el índice (para series) o la columna 'date' (para DataFrames) es de tipo fecha.
-    
-    Retorna:
-    pd.DataFrame: DataFrame con las columnas 'date' y 'venta', que combina los datos de todas las entradas.
-    """
-    # Lista para almacenar DataFrames individuales
-    dataframes = []
-    
-    for obj in args:
-        if isinstance(obj, pd.Series):  # Si es una serie
-            df = obj.reset_index()  # Convierte la serie a DataFrame
-            df.columns = ['date', 'venta']  # Renombra las columnas
-        elif isinstance(obj, pd.DataFrame):  # Si es un DataFrame
-            # Asegúrate de que tenga las columnas requeridas
-            if 'date' in obj.columns and 'venta' in obj.columns:
-                df = obj[['date', 'venta']]
-            else:
-                raise ValueError("Los DataFrames deben tener columnas 'date' y 'venta'")
-        else:
-            raise TypeError("Solo se aceptan objetos de tipo pd.Series o pd.DataFrame")
-        
-        dataframes.append(df)
-        
-    # Concatenar todos los DataFrames
-    series_concats = pd.concat(dataframes, ignore_index=True)
-    series_concats['date']=pd.to_datetime(series_concats['date'],format='%Y-%m-%d')
-    series_concats=series_concats.sort_values(by='date').reset_index(drop=True)
-    return series_concats
+def concat_series_df(*args):
 
-def concat2(*args):
     """
     Combina múltiples series y/o DataFrames en un único DataFrame, con las columnas 'date' y 'venta'.
     
@@ -84,3 +51,15 @@ def concat2(*args):
     result = result.sort_values(by='date').reset_index(drop=True)
     
     return result
+
+def concat_result(predictions,df_sales_predictions,best_results_backtesting,country,category):
+    predictions=predictions[-12:].copy()
+    predictions['country']=country
+    predictions['category group']=category
+    predictions['model']='sarimax'
+    predictions['mape']=best_results_backtesting['mape']
+    predictions=predictions[['country','category group','date','venta','model','mape']]
+    df_sales_predictions = pd.concat([predictions, df_sales_predictions], axis=0)
+    df_sales_predictions['date'] = pd.to_datetime(df_sales_predictions['date'])
+    df_sales_predictions=df_sales_predictions.sort_values(by=['country','category group','date'])
+    return df_sales_predictions

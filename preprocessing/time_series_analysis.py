@@ -1,7 +1,7 @@
 #======================
 #--- Paquetes
 #======================
-from packages import np
+from packages import np,seasonal_decompose,pd
 
 
 #==============================================
@@ -28,32 +28,27 @@ def time_serie(df, filtros):
     try:
         # Filtrar el DataFrame según el país y las categorías proporcionadas
         df_filtrado = df[
-            (df['Country'] == filtros['Country']) & 
-            (df['Category Group'].isin(filtros['Category Group']))
+            (df['country'] == filtros['country']) & 
+            (df['category group'].isin(filtros['category group']))
         ]
 
         # Crear un diccionario para almacenar las series de tiempo
         series_dict={}
         series_sales_dict={}
         # Agrupar por categoría y generar la serie de tiempo por cada categoría
-        for category in filtros['Category Group']:
-            df_categoria = df_filtrado[df_filtrado['Category Group'] == category]
+        for category in filtros['category group']:
+            df_categoria = df_filtrado[df_filtrado['category group'] == category]
         
             if not df_categoria.empty:
-                # Agrupar las ventas por mes
-                df_grouped = (
-                    df_categoria
-                    .groupby(df_categoria['Date'].dt.to_period('M'))['Total Sales']
-                    .sum()
-                    .reset_index()
-                )
-                df_grouped['Date'] = df_grouped['Date'].dt.to_timestamp()
+                df_grouped = df_categoria
             
                 # Crear la serie de tiempo
-                serie = df_grouped.set_index('Date')['Total Sales']
+                serie = df_grouped.set_index('date')['venta']
                 serie = serie.asfreq('MS')  # Frecuencia mensual
-            
-                # Guardar la serie en el diccionario
+                # Verificar y rellenar NaN solo si es necesario
+                if serie.isna().any():
+                    serie = serie.interpolate(method='linear')  # Interpolación lineal
+              # Guardar la serie en el diccionario
                 series_dict[category] = serie
         series_sales_dict=series_dict.copy()    
         print("Se ejecutó correctamente: time_serie")
