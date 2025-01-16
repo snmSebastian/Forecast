@@ -7,7 +7,7 @@ from packages import np,seasonal_decompose,pd
 #==============================================
 #---- Creacion series de tiempo
 #==============================================
-
+#--- Country-Category Group
 def time_serie(df, filtros):
     
     
@@ -56,6 +56,57 @@ def time_serie(df, filtros):
         return series_sales_dict,series_dict
     except Exception as e:
         print(f"Error en la generación de series de tiempo: {e}")
+
+#--- Country
+
+def time_serie_country(df, filtros_country):
+    
+    
+    """
+    Genera series de tiempo por país 
+
+    Args:
+        df (pd.DataFrame): DataFrame con los datos de ventas.
+        filters (dict): Filtros para seleccionar país. 
+                        
+
+    Returns:
+        dict: Diccionario con series de tiempo para cada country.
+        dict: Diccionario con datos originales sin preprocesar por country.
+    """
+
+
+    try:
+        # Filtrar el DataFrame según el país y las categorías proporcionadas
+        df_filtrado = df[
+            (df['country'].isin(filtros_country)) 
+        ]
+
+        # Crear un diccionario para almacenar las series de tiempo
+        series_dict={}
+        series_sales_dict={}
+        # Agrupar por categoría y generar la serie de tiempo por cada categoría
+        for country in filtros_country:
+            df_country = df_filtrado[df_filtrado['country'] == country]
+        
+            if not df_country.empty:
+                df_grouped = df_country
+            
+                # Crear la serie de tiempo
+                serie = df_grouped.set_index('date')['venta']
+                serie = serie.asfreq('MS')  # Frecuencia mensual
+                # Verificar y rellenar NaN solo si es necesario
+                if serie.isna().any():
+                    serie = serie.interpolate(method='linear')  # Interpolación lineal
+              # Guardar la serie en el diccionario
+                series_dict[country] = serie
+        series_sales_dict=series_dict.copy()    
+        print("Se ejecutó correctamente: time_serie")
+        print("-------------------------------------------------------------------------------\n")
+        return series_sales_dict,series_dict
+    except Exception as e:
+        print(f"Error en la generación de series de tiempo: {e}")
+
 
 #==============================
 #--- Preproccesing

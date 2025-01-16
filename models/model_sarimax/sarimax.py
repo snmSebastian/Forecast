@@ -8,6 +8,9 @@ from .model_training import get_best_sarimax_parameters, perform_grid_search, ru
 from .prediction import fit_final_model_and_predict
 from results import inverse_transform
 
+#============================================
+#--- Modelo Sarimax
+#============================================
 def sarimax_model(serie):
     transfor_serie,diff_serie_tendencia,diff_serie_estacionalidad=preprocess_series(serie)
     param_grid=generate_initial_param_grid(transfor_serie)
@@ -23,3 +26,5 @@ def sarimax_model(serie):
     df_predict=inverse_transform(serie,diff_serie_tendencia,diff_serie_estacionalidad,predictions)
     
     return df_predict,best_results_backtesting
+
+

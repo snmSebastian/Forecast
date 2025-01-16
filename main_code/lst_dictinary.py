@@ -155,3 +155,12 @@ filtros=[
     {'country':'Peru',
      'category group':lst_category_group_peru}
 ]
+
+filtros_country=['Argentina',
+'Bolivia',
+'Brasil',
+'Chile',
+'Colombia',
+'Ecuador',
+'Mexico',
+'Peru']

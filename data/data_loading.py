@@ -178,8 +178,14 @@ def historical_sales(ruta):
 #df_SalesAndProduct=HistoricalSales(ruta)
 #print(df_SalesAndProduct.head())
     
+
+#================================
+#--- MOdelo por country y category group
+#================================    
 def historical_sales_and_predicts(df_sales_and_product):
     df_filter=df_sales_and_product[['Country','Category Group','Date','Total Sales']].copy()
+    
+    
     # Aseguramos que la columna Date sea de tipo datetime
     df_filter['Date'] = pd.to_datetime(df_filter['Date'])
 
@@ -207,4 +213,41 @@ def historical_sales_and_predicts(df_sales_and_product):
     df_grouped['model']='historico'
     df_grouped['mape']=0
     df_sales_and_predicts=df_grouped[['country','category group','date','venta','model','mape']]
+    return df_sales_and_predicts
+
+
+#================================
+#--- MOdelo por country
+#================================
+def historical_sales_and_predicts_country(df_sales_and_product):
+    df_filter=df_sales_and_product[['Country','Date','Total Sales']].copy()
+    
+    
+    # Aseguramos que la columna Date sea de tipo datetime
+    df_filter['Date'] = pd.to_datetime(df_filter['Date'])
+
+    df_filter=df_filter.sort_values(
+        by=['Country', 'Date'],
+        ascending=[True,False])
+    
+
+    
+    # Agrupamos por Country, Category Group y Date truncada al mes
+    df_grouped = (
+        df_filter
+        #Para cuando el modelo se desea hacer por country 
+        .groupby(['Country', df_filter['Date'].dt.to_period('M')])['Total Sales']
+        .sum()
+        .reset_index()
+    )
+    df_grouped['Date'] = df_grouped['Date'].dt.to_timestamp()
+    # Renombramos columnas
+    df_grouped = df_grouped.rename(columns={
+        'Country': 'country',
+        'Date': 'date',
+        'Total Sales': 'venta'
+    })
+    df_grouped['model']='historico'
+    df_grouped['mape']=0
+    df_sales_and_predicts=df_grouped[['country','date','venta','model','mape']]
     return df_sales_and_predicts
