@@ -183,6 +183,11 @@ def historical_sales(ruta):
 #--- MOdelo por country y category group
 #================================    
 def historical_sales_and_predicts(df_sales_and_product):
+    '''
+    Crea el dataframe que contendra el historico de ventas junto con las predicciones
+    Arg: dataframe con el ehistorico de ventas sin procesar
+    return; dataframe agrupado por category group y country con las siguientes columnas; 'country','date','venta','model','mape'
+    '''
     df_filter=df_sales_and_product[['Country','Category Group','Date','Total Sales']].copy()
     
     
@@ -220,6 +225,11 @@ def historical_sales_and_predicts(df_sales_and_product):
 #--- MOdelo por country
 #================================
 def historical_sales_and_predicts_country(df_sales_and_product):
+    '''
+    Crea el dataframe que contendra el historico de ventas junto con las predicciones
+    Arg: dataframe con el ehistorico de ventas sin procesar
+    return; dataframe agrupado por country con las siguientes columnas; 'country','date','venta','model','mape'
+    '''
     df_filter=df_sales_and_product[['Country','Date','Total Sales']].copy()
     
     

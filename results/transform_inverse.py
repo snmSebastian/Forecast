@@ -1,5 +1,23 @@
 from packages import pd,np
 def inverse_transform(original_serie,diff_serie_tendencia,diff_serie_estacionalidad,predictions):
+    '''
+    Reconvierte las predicciones preprocesadas a la escala original de la serie temporal.
+
+    Args:
+        original_serie (pd.Series): Serie original antes del preprocesamiento.
+        diff_serie_tendencia (pd.DataFrame): Diferencias de tendencia con columnas "date" y "venta".
+        diff_serie_estacionalidad (pd.DataFrame): Diferencias estacionales con columnas "date" y "venta".
+        predictions (pd.DataFrame): Predicciones en escala diferenciada, con columnas "date" y "venta".
+
+    Returns:
+        pd.DataFrame: Serie temporal con columnas "date" y "venta" en la escala original.
+
+    Pasos principales:
+        1. Combina las diferencias de tendencia, estacionalidad y predicciones.
+        2. Revierte las diferencias estacionales (desplazamiento de 12 pasos).
+        3. Reintegra la tendencia acumulada, comenzando desde el primer valor original.
+        4. Aplica la transformación exponencial para regresar de escala logarítmica.
+    '''
     diff_serie_tendencia=diff_serie_tendencia[:12]
     from results import concat_series_df
     series_concats=concat_series_df(diff_serie_tendencia,diff_serie_estacionalidad,predictions)

@@ -1,2 +1,2 @@
-from .combine_series_to_dataframe import concat_series_df,concat_result,concat_result_country
+from .combine_series_to_dataframe import concat_series_df,concat_result,concat_result_country,concat_result_country_basico
 from .transform_inverse import inverse_transform

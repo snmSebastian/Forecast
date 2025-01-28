@@ -76,3 +76,16 @@ def concat_result_country(predictions,df_sales_predictions,best_results_backtest
     df_sales_predictions['date'] = pd.to_datetime(df_sales_predictions['date'])
     df_sales_predictions=df_sales_predictions.sort_values(by=['country','date'])
     return df_sales_predictions
+
+
+
+
+def concat_result_country_basico(predictions,df_sales_predictions,country):
+    predictions=predictions[-12:].copy()
+    predictions['country']=country
+    predictions['model']='sarimax'
+    predictions=predictions[['country','date','venta','model']]
+    df_sales_predictions = pd.concat([predictions, df_sales_predictions], axis=0)
+    df_sales_predictions['date'] = pd.to_datetime(df_sales_predictions['date'])
+    df_sales_predictions=df_sales_predictions.sort_values(by=['country','date'])
+    return df_sales_predictions
